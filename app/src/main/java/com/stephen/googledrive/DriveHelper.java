@@ -17,6 +17,8 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -44,16 +46,21 @@ public class DriveHelper {
     private String mRefreshToken;
 
     public DriveHelper(String authCode) {
-        mAuthCode = authCode;
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL_API)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        mDriveApi = retrofit.create(DriveApi.class);
+        try {
+            mAuthCode = URLDecoder.decode(authCode, "UTF-8");
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(BASE_URL_API)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+            mDriveApi = retrofit.create(DriveApi.class);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
      * 获取AccessToken
+     *
      * @param callback 回调
      */
     public void getToken(final StateCallback callback) {
@@ -66,7 +73,7 @@ public class DriveHelper {
                 if (message == null) {
                     Token token = response.body();
                     mAccessToken = token.getAccessToken();
-                    mRefreshToken = token.getRefreshToken();
+                    mRefreshToken = token.getAccessToken();
                     if (callback != null) {
                         callback.onSuccess();
                     }
@@ -89,6 +96,7 @@ public class DriveHelper {
 
     /**
      * 刷新AccessToken
+     *
      * @param callback 回调
      */
     public void refreshToken(final StateCallback callback) {
@@ -123,6 +131,7 @@ public class DriveHelper {
 
     /**
      * 注销AccessToken
+     *
      * @param callback 回调
      */
     public void revokeToken(final StateCallback callback) {
@@ -157,6 +166,7 @@ public class DriveHelper {
 
     /**
      * 获取用户Google Drive账号信息
+     *
      * @param callback 回调
      */
     public void getAbout(final StateCallback callback) {
@@ -189,7 +199,8 @@ public class DriveHelper {
 
     /**
      * 根据关键字搜索文件列表
-     * @param word 搜索关键字
+     *
+     * @param word     搜索关键字
      * @param callback 回调
      */
     public void searchFiles(String word, final ListCallback callback) {
@@ -223,6 +234,7 @@ public class DriveHelper {
 
     /**
      * 根据父目录ID获取子文件列表
+     *
      * @param folderId 父目录ID
      * @param callback 回调
      */
@@ -257,7 +269,8 @@ public class DriveHelper {
 
     /**
      * 根据文件ID获取文件信息
-     * @param fileId 文件ID
+     *
+     * @param fileId   文件ID
      * @param callback 回调
      */
     public void getFile(String fileId, final StateCallback callback) {
@@ -289,8 +302,9 @@ public class DriveHelper {
 
     /**
      * 从Google Drive下载文件
-     * @param fileId 需要下载的文件ID
-     * @param dstFile 下载文件到本地的路径
+     *
+     * @param fileId   需要下载的文件ID
+     * @param dstFile  下载文件到本地的路径
      * @param callback 回调
      */
     public void downloadFile(String fileId, final File dstFile, final StateCallback callback) {
@@ -354,8 +368,9 @@ public class DriveHelper {
 
     /**
      * 上传文件到指定目录
-     * @param srcFile 本地需要上传的文件
-     * @param title 上传文件名称
+     *
+     * @param srcFile  本地需要上传的文件
+     * @param title    上传文件名称
      * @param folderId 上传文件父目录ID
      * @param callback 回调
      */
@@ -406,9 +421,10 @@ public class DriveHelper {
 
     /**
      * 从根目录移动文件
-     * @param fileId 需要移动的文件ID
+     *
+     * @param fileId      需要移动的文件ID
      * @param dstFolderId 目标目录ID
-     * @param callback 回调
+     * @param callback    回调
      */
     public void moveFile(String fileId, String dstFolderId, StateCallback callback) {
         moveFile(fileId, dstFolderId, ROOT_DRIVE_ID, callback);
@@ -416,10 +432,11 @@ public class DriveHelper {
 
     /**
      * 移动文件
-     * @param fileId 需要移动的文件ID
+     *
+     * @param fileId      需要移动的文件ID
      * @param dstFolderId 目标目录ID
      * @param srcFolderId 源目录ID
-     * @param callback 回调
+     * @param callback    回调
      */
     public void moveFile(String fileId, String dstFolderId, String srcFolderId, final StateCallback callback) {
         Call<DriveFile> call = mDriveApi.moveFile(getAuthToken(), fileId, dstFolderId, srcFolderId);
@@ -450,7 +467,8 @@ public class DriveHelper {
 
     /**
      * 删除文件
-     * @param fileId 需要删除的文件ID
+     *
+     * @param fileId   需要删除的文件ID
      * @param callback 回调
      */
     public void deleteFile(String fileId, final StateCallback callback) {

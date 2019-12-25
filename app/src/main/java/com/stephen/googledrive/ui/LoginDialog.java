@@ -20,6 +20,8 @@ public class LoginDialog extends Dialog {
 
     private Callback mCallback;
 
+    private static final String USER_AGENT_FAKE = "Mozilla/5.0 (Linux; Android 4.1.1; Galaxy Nexus Build/JRO03C) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166 Mobile Safari/535.19";
+
     public LoginDialog(Context context) {
         super(context, R.style.LoginDialog);
     }
@@ -48,6 +50,7 @@ public class LoginDialog extends Dialog {
         vgLogin.setVisibility(View.VISIBLE);
         wvLogin.setVisibility(View.INVISIBLE);
         wvLogin.getSettings().setJavaScriptEnabled(true);
+        wvLogin.getSettings().setUserAgentString(USER_AGENT_FAKE);
         wvLogin.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
@@ -58,7 +61,7 @@ public class LoginDialog extends Dialog {
                 if (url.contains("error=access_denied") && mCallback != null) {
                     mCallback.onLoginError();
                 } else if (url.contains("code=") && mCallback != null) {
-                    mCallback.onLoginSuccess(url.replace("http://localhost/?code=", ""));
+                    mCallback.onLoginSuccess(url.replace("https://localhost/?code=", ""));
                 }
             }
         });
